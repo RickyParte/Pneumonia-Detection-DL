@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumonia Detection</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding-top: 80px;
+            /* Adjust based on your navbar height */
+        }
+
+        .container1 {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        #uploadedImage {
+            display: none;
+            max-width: 100%;
+            margin: 20px auto;
+            max-height: 200px; /* Added to limit height */
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">LungXpert</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link fs-3" href="/">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container1 mt-2">
+        <h1>Upload Your X-Ray Image</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="custom-file">
+                <input type="file" class="custom-file-input" id="fileInput" name="filename" onchange="updateFileName()">
+                <label class="custom-file-label" for="fileInput" id="fileNameLabel">Choose file</label>
+            </div>
+            <button type="button" class="btn btn-primary mt-3" onclick="uploadImage()">Upload</button>
+        </form>
+        <img id="uploadedImage" src="#" alt="Uploaded Image">
+        <div id="predictionResult" class="mt-3 text-center"></div>
+        <div class="container text-center ">
+            <div id="predictionMessage" class="mt-3 text-center"></div>
+        </div>
+        
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">&copy; 2024 LungXpert</span>
+        </div>
+    </footer>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const predictionResult = document.getElementById('predictionResult');
+                    const predictionMessage = document.getElementById('predictionMessage');
+                    const uploadedImage = document.getElementById('uploadedImage');
+                    if (data.prediction === 'Pneumonia') {
+                        predictionResult.innerHTML = '<strong>Prediction:</strong> Pneumonia detected!';
+                        predictionResult.style.color = 'red';
+                        predictionMessage.innerHTML = '<strong>Stay strong, keep fighting, and remember that you are not alone in this battle. With the right treatment and support, you’ll soon be on the road to recovery. Keep a positive mindset and trust in your body’s resilience.</strong>';
+                    } else if (data.prediction === 'Not Pneumonia') {
+                        predictionResult.style.color = 'black';
+                        predictionResult.innerHTML = '<strong>Prediction:</strong> No pneumonia detected.';
+                    } else {
+                        predictionResult.style.color = 'black';
+                        predictionResult.innerHTML = '<strong> File Not Selected </strong>';
+                    }
+                    uploadedImage.src = URL.createObjectURL(file);
+                    uploadedImage.style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileNameLabel = document.getElementById('fileNameLabel');
+            fileNameLabel.innerText = fileInput.files[0].name;
+        }
+
+
+    </script>
+</body>
+
+</html>

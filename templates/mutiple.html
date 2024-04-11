@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classifier</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#predictionResult {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+    </style>
+</head>
+<body>
+    <h1>Image Classifier</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="files" multiple>
+        <button type="button" onclick="uploadImages()">Upload</button>   
+    </form>
+    <div id="predictionResult"></div>
+
+    <script>
+        function uploadImages() {
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
+            const formData = new FormData();
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files[]', files[i]);
+            }
+
+            fetch('/predicts', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let result = 'Predictions: ';
+                for (let i = 0; i < data.predictions.length; i++) {
+                    result += data.predictions[i] + ' ';
+                }
+                document.getElementById('predictionResult').innerText = result;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
